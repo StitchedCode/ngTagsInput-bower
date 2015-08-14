@@ -1,11 +1,11 @@
 /*!
- * ngTagsInput v3.0.0
+ * ngTagsInput v3.0.0-stitched.1
  * http://mbenford.github.io/ngTagsInput
  *
  * Copyright (c) 2013-2015 Michael Benford
  * License: MIT
  *
- * Generated at 2015-07-13 02:08:11 -0300
+ * Generated at 2015-08-14 01:14:59 +0100
  */
 (function() {
 'use strict';
@@ -74,7 +74,9 @@ var tagsInput = angular.module('ngTagsInput', []);
  *    is available as $tag. This method must return either true or false. If false, the tag will not be removed.
  * @param {expression=} [onTagRemoved=NA] Expression to evaluate upon removing an existing tag. The removed tag is
  *    available as $tag.
+ * @param {expression=} [onNgBlur=NA] Expression to evaluate upon input blur. Equivalent to ng-blur but on the input, not the parent
  * @param {expression=} [onTagClicked=NA] Expression to evaluate upon clicking an existing tag. The clicked tag is available as $tag.
+ * @param {boolean=} [selectTagOnClick=false] Flag indicating that clicking a tag causes it to be selected. This runs after any onTagClicked function
  */
 tagsInput.directive('tagsInput', ["$timeout", "$document", "$window", "tagsInputConfig", "tiUtil", function($timeout, $document, $window, tagsInputConfig, tiUtil) {
     function TagList(options, events, onTagAdding, onTagRemoving) {
@@ -187,6 +189,7 @@ tagsInput.directive('tagsInput', ["$timeout", "$document", "$window", "tagsInput
             onInvalidTag: '&',
             onTagRemoving: '&',
             onTagRemoved: '&',
+            onNgBlur: '&',
             onTagClicked: '&'
         },
         replace: false,
@@ -218,7 +221,8 @@ tagsInput.directive('tagsInput', ["$timeout", "$document", "$window", "tagsInput
                 keyProperty: [String, ''],
                 allowLeftoverText: [Boolean, false],
                 addFromAutocompleteOnly: [Boolean, false],
-                spellcheck: [Boolean, true]
+                spellcheck: [Boolean, true],
+                selectTagOnClick: [Boolean, false]
             });
 
             $scope.tagList = new TagList($scope.options, $scope.events,
@@ -375,7 +379,12 @@ tagsInput.directive('tagsInput', ["$timeout", "$document", "$window", "tagsInput
                 .on('tag-added', scope.onTagAdded)
                 .on('invalid-tag', scope.onInvalidTag)
                 .on('tag-removed', scope.onTagRemoved)
-                .on('tag-clicked', scope.onTagClicked)
+                .on('tag-clicked', function(args){
+                    scope.onTagClicked(args);
+                    if(options.selectTagOnClick){
+                        tagList.select(tagList.items.indexOf(args.$tag));
+                    }
+                })
                 .on('tag-added', function() {
                     scope.newTag.text('');
                 })
@@ -406,6 +415,7 @@ tagsInput.directive('tagsInput', ["$timeout", "$document", "$window", "tagsInput
                     if (options.addOnBlur && !options.addFromAutocompleteOnly) {
                         tagList.addText(scope.newTag.text());
                     }
+                    scope.onNgBlur();
                     element.triggerHandler('blur');
                     setElementValidity();
                 })
@@ -536,7 +546,8 @@ tagsInput.directive('tiTagItem', ["tiUtil", function(tiUtil) {
  * @param {boolean=} [loadOnFocus=false] Flag indicating that the source option will be evaluated when the input element
  *    gains focus. The current input value is available as $query.
  * @param {boolean=} [selectFirstMatch=true] Flag indicating that the first match will be automatically selected once
- *    the suggestion list is shown.
+ * @param {boolean=} [selectSecondMatch=false] Flag indicating that the second match will be automatically selected once
+ *    the suggestion list is shown. Overrides selectFirstMatch.
  */
 tagsInput.directive('autoComplete', ["$document", "$timeout", "$sce", "$q", "tagsInputConfig", "tiUtil", function($document, $timeout, $sce, $q, tagsInputConfig, tiUtil) {
     function SuggestionList(loadFn, options, events) {
@@ -568,11 +579,16 @@ tagsInput.directive('autoComplete', ["$document", "$timeout", "$sce", "$q", "tag
             self.query = null;
         };
         self.show = function() {
-            if (options.selectFirstMatch) {
-                self.select(0);
+            if (options.selectSecondMatch) {
+                self.select(1);
             }
             else {
-                self.selected = null;
+                if (options.selectFirstMatch) {
+                    self.select(0);
+                }
+                else {
+                    self.selected = null;
+                }
             }
             self.visible = true;
         };
@@ -657,6 +673,7 @@ tagsInput.directive('autoComplete', ["$document", "$timeout", "$sce", "$q", "tag
                 loadOnEmpty: [Boolean, false],
                 loadOnFocus: [Boolean, false],
                 selectFirstMatch: [Boolean, true],
+                selectSecondMatch: [Boolean, false],
                 displayProperty: [String, '']
             });
 
