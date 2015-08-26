@@ -1,11 +1,11 @@
 /*!
- * ngTagsInput v3.0.0-stitched.1
+ * ngTagsInput v3.0.0-stitched.2
  * http://mbenford.github.io/ngTagsInput
  *
  * Copyright (c) 2013-2015 Michael Benford
  * License: MIT
  *
- * Generated at 2015-08-14 01:14:59 +0100
+ * Generated at 2015-08-26 16:48:58 +0100
  */
 (function() {
 'use strict';
@@ -548,6 +548,7 @@ tagsInput.directive('tiTagItem', ["tiUtil", function(tiUtil) {
  * @param {boolean=} [selectFirstMatch=true] Flag indicating that the first match will be automatically selected once
  * @param {boolean=} [selectSecondMatch=false] Flag indicating that the second match will be automatically selected once
  *    the suggestion list is shown. Overrides selectFirstMatch.
+* @param {boolean=} [captiveScroll=false] Flag indicating that the suggestion lists scroll events will not bubble to the parent
  */
 tagsInput.directive('autoComplete', ["$document", "$timeout", "$sce", "$q", "tagsInputConfig", "tiUtil", function($document, $timeout, $sce, $q, tagsInputConfig, tiUtil) {
     function SuggestionList(loadFn, options, events) {
@@ -674,7 +675,8 @@ tagsInput.directive('autoComplete', ["$document", "$timeout", "$sce", "$q", "tag
                 loadOnFocus: [Boolean, false],
                 selectFirstMatch: [Boolean, true],
                 selectSecondMatch: [Boolean, false],
-                displayProperty: [String, '']
+                displayProperty: [String, ''],
+                captiveScroll: [Boolean, false]
             });
 
             $scope.suggestionList = new SuggestionList($scope.source, $scope.options, $scope.events);
@@ -786,6 +788,24 @@ tagsInput.directive('autoComplete', ["$document", "$timeout", "$sce", "$q", "tag
 
             events.on('suggestion-selected', function(index) {
                 scrollToElement(element, index);
+            });
+
+            // bind the listener to the parent, the suggestion list doesn't appear instantly / is replace on successive queries?
+            element.on('wheel', function (e) {
+                // operate on the list itself, though
+                var list = element.find('ul.suggestion-list');
+                if(
+                    list && scope.options.captiveScroll &&
+                    ((
+                        list.scrollTop() === (list.get(0).scrollHeight - list.height()) &&
+                        e.originalEvent.deltaY > 0
+                    ) || (
+                        list.scrollTop() === 0 &&
+                        e.originalEvent.deltaY < 0
+                    ))
+                ){
+                  e.preventDefault();
+                }
             });
         }
     };
