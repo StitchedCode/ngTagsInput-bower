@@ -1,11 +1,11 @@
 /*!
- * ngTagsInput v3.0.0-stitched.2
+ * ngTagsInput v3.0.0-stitched.3
  * http://mbenford.github.io/ngTagsInput
  *
  * Copyright (c) 2013-2015 Michael Benford
  * License: MIT
  *
- * Generated at 2015-08-26 16:49:49 +0100
+ * Generated at 2015-10-29 11:00:06 +0000
  */
 (function() {
 'use strict';
@@ -58,6 +58,7 @@ var tagsInput = angular.module('ngTagsInput', []);
  * @param {boolean=} [addOnComma=true] Flag indicating that a new tag will be added on pressing the COMMA key.
  * @param {boolean=} [addOnBlur=true] Flag indicating that a new tag will be added when the input field loses focus.
  * @param {boolean=} [addOnPaste=false] Flag indicating that the text pasted into the input field will be split into tags.
+ * @param {boolean=} [blurOnEscape=false] Flag indicating that the input should fire a blur event when the escape key is pressed
  * @param {string=} [pasteSplitPattern=,] Regular expression used to split the pasted text into tags.
  * @param {boolean=} [replaceSpacesWithDashes=true] Flag indicating that spaces will be replaced with dashes.
  * @param {string=} [allowedTagsPattern=.+] Regular expression that determines whether a new tag is valid.
@@ -160,6 +161,10 @@ tagsInput.directive('tagsInput', ["$timeout", "$document", "$window", "tagsInput
             self.select(++self.index);
         };
 
+        self.triggerBlur = function() {
+            events.trigger('input-blur');
+        };
+
         self.removeSelected = function() {
             return self.remove(self.index);
         };
@@ -212,6 +217,7 @@ tagsInput.directive('tagsInput', ["$timeout", "$document", "$window", "tagsInput
                 addOnComma: [Boolean, true],
                 addOnBlur: [Boolean, true],
                 addOnPaste: [Boolean, false],
+                blurOnEscape: [Boolean, false],
                 pasteSplitPattern: [RegExp, /,/],
                 allowedTagsPattern: [RegExp, /.+/],
                 enableEditingLastTag: [Boolean, false],
@@ -270,7 +276,7 @@ tagsInput.directive('tagsInput', ["$timeout", "$document", "$window", "tagsInput
             };
         }],
         link: function(scope, element, attrs, ngModelCtrl) {
-            var hotkeys = [KEYS.enter, KEYS.comma, KEYS.space, KEYS.backspace, KEYS.delete, KEYS.left, KEYS.right],
+            var hotkeys = [KEYS.enter, KEYS.comma, KEYS.space, KEYS.backspace, KEYS.delete, KEYS.left, KEYS.right, KEYS.escape],
                 tagList = scope.tagList,
                 events = scope.events,
                 options = scope.options,
@@ -422,7 +428,7 @@ tagsInput.directive('tagsInput', ["$timeout", "$document", "$window", "tagsInput
                 .on('input-keydown', function(event) {
                     var key = event.keyCode,
                         addKeys = {},
-                        shouldAdd, shouldRemove, shouldSelect, shouldEditLastTag;
+                        shouldAdd, shouldRemove, shouldSelect, shouldEditLastTag, shouldBlur;
 
                     if (tiUtil.isModifierOn(event) || hotkeys.indexOf(key) === -1) {
                         return;
@@ -436,6 +442,7 @@ tagsInput.directive('tagsInput', ["$timeout", "$document", "$window", "tagsInput
                     shouldRemove = (key === KEYS.backspace || key === KEYS.delete) && tagList.selected;
                     shouldEditLastTag = key === KEYS.backspace && scope.newTag.text().length === 0 && options.enableEditingLastTag;
                     shouldSelect = (key === KEYS.backspace || key === KEYS.left || key === KEYS.right) && scope.newTag.text().length === 0 && !options.enableEditingLastTag;
+                    shouldBlur = key === KEYS.escape && options.blurOnEscape;
 
                     if (shouldAdd) {
                         tagList.addText(scope.newTag.text());
@@ -461,8 +468,11 @@ tagsInput.directive('tagsInput', ["$timeout", "$document", "$window", "tagsInput
                             tagList.selectNext();
                         }
                     }
+                    else if (shouldBlur) {
+                        tagList.triggerBlur();
+                    }
 
-                    if (shouldAdd || shouldSelect || shouldRemove || shouldEditLastTag) {
+                    if (shouldAdd || shouldSelect || shouldRemove || shouldEditLastTag || shouldBlur) {
                         event.preventDefault();
                     }
                 })
