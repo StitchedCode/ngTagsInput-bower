@@ -1,11 +1,11 @@
 /*!
- * ngTagsInput v3.0.0-stitched.4
+ * ngTagsInput v3.0.0-stitched.5
  * http://mbenford.github.io/ngTagsInput
  *
  * Copyright (c) 2013-2015 Michael Benford
  * License: MIT
  *
- * Generated at 2015-11-16 14:07:37 +0000
+ * Generated at 2015-11-16 15:22:06 +0000
  */
 (function() {
 'use strict';
@@ -123,7 +123,7 @@ tagsInput.directive('tagsInput', ["$timeout", "$document", "$window", "tagsInput
 
                 self.clearCurrent();
                 self.items.push(tag);
-                self.setCurrent(self.items.length);
+                self.setCurrent(self.items.length-1);
 
                 events.trigger('tag-added', { $tag: tag });
             }
