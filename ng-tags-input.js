@@ -1,11 +1,11 @@
 /*!
- * ngTagsInput v3.0.0-stitched.3
+ * ngTagsInput v3.0.0-stitched.4
  * http://mbenford.github.io/ngTagsInput
  *
  * Copyright (c) 2013-2015 Michael Benford
  * License: MIT
  *
- * Generated at 2015-10-29 11:00:52 +0000
+ * Generated at 2015-11-16 14:07:37 +0000
  */
 (function() {
 'use strict';
@@ -120,7 +120,11 @@ tagsInput.directive('tagsInput', ["$timeout", "$document", "$window", "tagsInput
             setTagText(tag, tagText);
 
             if (tagIsValid(tag)) {
+
+                self.clearCurrent();
                 self.items.push(tag);
+                self.setCurrent(self.items.length);
+
                 events.trigger('tag-added', { $tag: tag });
             }
             else if (tagText) {
@@ -151,6 +155,9 @@ tagsInput.directive('tagsInput', ["$timeout", "$document", "$window", "tagsInput
 
             self.index = index;
             self.selected = self.items[index];
+
+            self.clearCurrent();
+            self.setCurrent(index);
         };
 
         self.selectPrior = function() {
@@ -175,6 +182,18 @@ tagsInput.directive('tagsInput', ["$timeout", "$document", "$window", "tagsInput
         };
 
         self.clearSelection();
+
+        self.clearCurrent = function(){
+            for(var i=0; i< self.items.length; i++){
+                self.items[i]._current = false;
+            }
+        };
+
+        self.setCurrent = function(index){
+            if(index && self.items[index]){
+                self.items[index]._current = true;
+            }
+        };
 
         return self;
     }
