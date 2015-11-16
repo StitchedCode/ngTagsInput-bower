@@ -1,11 +1,11 @@
 /*!
- * ngTagsInput v3.0.0-stitched.5
+ * ngTagsInput v3.0.0-stitched.6
  * http://mbenford.github.io/ngTagsInput
  *
  * Copyright (c) 2013-2015 Michael Benford
  * License: MIT
  *
- * Generated at 2015-11-16 15:22:06 +0000
+ * Generated at 2015-11-16 17:18:43 +0000
  */
 (function() {
 'use strict';
@@ -190,7 +190,7 @@ tagsInput.directive('tagsInput', ["$timeout", "$document", "$window", "tagsInput
         };
 
         self.setCurrent = function(index){
-            if(index && self.items[index]){
+            if( !(!index && index !==0) && self.items[index]){
                 self.items[index]._current = true;
             }
         };
