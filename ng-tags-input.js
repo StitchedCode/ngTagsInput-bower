@@ -1,11 +1,11 @@
 /*!
- * ngTagsInput v3.0.0-stitched.6
+ * ngTagsInput v3.0.0-stitched.7
  * http://mbenford.github.io/ngTagsInput
  *
  * Copyright (c) 2013-2015 Michael Benford
  * License: MIT
  *
- * Generated at 2015-11-16 17:18:43 +0000
+ * Generated at 2015-11-19 14:24:13 +0000
  */
 (function() {
 'use strict';
@@ -412,6 +412,9 @@ tagsInput.directive('tagsInput', ["$timeout", "$document", "$window", "tagsInput
                 })
                 .on('tag-added', function() {
                     scope.newTag.text('');
+                    tagList.clearCurrent();
+                    tagList.clearSelection();
+                    tagList.setCurrent(tagList.items.length-1);
                 })
                 .on('tag-added tag-removed', function() {
                     scope.tags = tagList.items;
@@ -419,6 +422,10 @@ tagsInput.directive('tagsInput', ["$timeout", "$document", "$window", "tagsInput
                     // automatically, but since the model is an array, $setViewValue does nothing and it's up to us to do it.
                     // Unfortunately this won't trigger any registered $parser and there's no safe way to do it.
                     ngModelCtrl.$setDirty();
+                    tagList.clearCurrent();
+                    tagList.clearSelection();
+                    tagList.setCurrent(tagList.items.length-1);
+
                 })
                 .on('invalid-tag', function() {
                     scope.newTag.invalid = true;
@@ -435,6 +442,9 @@ tagsInput.directive('tagsInput', ["$timeout", "$document", "$window", "tagsInput
                 .on('input-focus', function() {
                     element.triggerHandler('focus');
                     ngModelCtrl.$setValidity('leftoverText', true);
+                    tagList.clearCurrent();
+                    tagList.clearSelection();
+                    tagList.setCurrent(tagList.items.length-1);
                 })
                 .on('input-blur', function() {
                     if (options.addOnBlur && !options.addFromAutocompleteOnly) {
@@ -442,6 +452,8 @@ tagsInput.directive('tagsInput', ["$timeout", "$document", "$window", "tagsInput
                     }
                     scope.onNgBlur();
                     element.triggerHandler('blur');
+                    tagList.clearCurrent();
+                    tagList.clearSelection();
                     setElementValidity();
                 })
                 .on('input-keydown', function(event) {
